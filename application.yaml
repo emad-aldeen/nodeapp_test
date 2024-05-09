@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp-arog-application
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/emad-aldeen/nodeapp_test.git
+    targetRevision: HEAD # latest commit/edit in the repo to be followed
+    path: ./ # path that will be watched and sync with
+  destination:
+    server: https://kubernetes.default.svc # default kubernetes service
+    namespace: myapp # argo will create new name space to hold this configuration
+
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true # this will let argo create the config namespace if it not exist in the cluster..
+
+    automated: # enable auto sync
+      selfHeal: true # give argo permission to override/sync any manual edits in cluster
+      prune: true # give argo ability to handle any change in component (delete, rename..), and reflect it on cluster
+
+# by default argo check every 3m on any changes, so we can add webhook to notify argo from repo about any change to trigger sync operation
